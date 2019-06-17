@@ -7,12 +7,9 @@ import time
 import sys
 
 
-
-# Subclassing QThread
-# http://qt-project.org/doc/latest/qthread.html
-class AThread(QThread):
+class SubProgramWatcher(QThread):
     def __init__(self, proc, flags):
-        super(AThread, self).__init__()
+        super(SubProgramWatcher, self).__init__()
         self.flags = flags
         self.send_flags()
         self.proc = proc
@@ -33,21 +30,22 @@ class AThread(QThread):
         count = 0
         while self.proc.poll() is None:  # While the process is running read flags
             if not self.read_flags()['done'] or self.read_flags()['killed']:
-                time.sleep(1)
+                time.sleep(.5)
                 print("{}. Flags Read:".format(count))
                 print(self.read_flags())
                 count += 1
 
 
-def using_q_thread():
+def main():
     app = QCoreApplication([])
-    o = {'kill': False, 'done': False, 'killed': False, "flt": 0.2}
-    p = subprocess.Popen([sys.executable, "subprogram.py"], stdout=subprocess.PIPE)
-    thread = AThread(p, o)
+    flags = {'kill': False, 'done': False, 'killed': False, "flt": 0.2}
+    proc = subprocess.Popen([sys.executable, "subprogram.py"], stdout=subprocess.PIPE)
+    thread = SubProgramWatcher(proc, flags)
     thread.finished.connect(app.exit)
     thread.start()
     sys.exit(app.exec_())
 
+
 if __name__ == "__main__":
-    using_q_thread()
+    main()
 
