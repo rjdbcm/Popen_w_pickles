@@ -2,6 +2,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 import subprocess
+from datetime import datetime
 import pickle
 import time
 import sys
@@ -15,7 +16,7 @@ class SubProgramWatcher(QThread):
         self.proc = proc
 
     def send_flags(self):
-        print("Flags Send:\n{}".format(self.flags))
+        print("[{}] Program Flags Send: {}".format(datetime.now(), self.flags))
         with open(r".flags.pkl", "wb") as outfile:
             pickle.dump(self.flags, outfile)
 
@@ -24,22 +25,23 @@ class SubProgramWatcher(QThread):
             flags = pickle.load(inpfile)
         if flags:
             self.flags = flags
-            return(self.flags)
+            return self.flags
 
     def run(self):
         count = 0
         while self.proc.poll() is None:  # While the process is running read flags
-            if not self.read_flags()['done'] or self.read_flags()['killed']:
-                time.sleep(.5)
-                print("{}. Flags Read:".format(count))
-                print(self.read_flags())
-                count += 1
+            if self.read_flags()['progress'] < 1.0:
+                if not self.read_flags()['done'] or self.read_flags()['killed']:
+                    time.sleep(.5)
+                    print("[{}] Program Flags Read: {}".format(datetime.now(), self.read_flags()))
+                    count += 1
+        print("[{}] DONE!".format(datetime.now()))
 
 
 def main():
     app = QCoreApplication([])
-    flags = {'kill': False, 'done': False, 'killed': False, "flt": 0.2}
-    proc = subprocess.Popen([sys.executable, "subprogram.py"], stdout=subprocess.PIPE)
+    flags = {'done': False, "progress": 0.0}
+    proc = subprocess.Popen([sys.executable, "subprogram.py"], stdout=subprocess.PIPE, shell=False)
     thread = SubProgramWatcher(proc, flags)
     thread.finished.connect(app.exit)
     thread.start()
