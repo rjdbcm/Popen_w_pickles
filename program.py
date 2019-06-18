@@ -22,17 +22,20 @@ class SubProgramWatcher(QThread):
 
     def read_flags(self):
         with open(r".flags.pkl", "rb") as inpfile:
-            flags = pickle.load(inpfile)
-        if flags:
+            try:
+                flags = pickle.load(inpfile)
+            except EOFError:
+                print("[{}] Program Flags Busy: Reusing old".format(datetime.now()))
+                flags = self.flags
             self.flags = flags
             return self.flags
 
     def run(self):
         count = 0
         while self.proc.poll() is None:  # While the process is running read flags
-            if self.read_flags()['progress'] < 1.0:
+            if self.read_flags()['progress'] < 1.0:  # Check that we a
                 if not self.read_flags()['done']:
-                    time.sleep(.5)
+                    time.sleep(.1)
                     print("[{}] Program Flags Read: {}".format(datetime.now(), self.read_flags()))
                     count += 1
         print("[{}] DONE!".format(datetime.now()))

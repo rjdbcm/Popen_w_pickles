@@ -7,8 +7,9 @@ import io
 
 class SubProgram(object):
     def __init__(self):
-
-        while self.read_flags()['progress'] < 1.0:
+        self.flags = self.read_flags()
+        self.io_flags()
+        while self.flags['progress'] < 1.0:
             time.sleep(.1)
             self.flags['progress'] += .01
             self.io_flags()
@@ -19,6 +20,7 @@ class SubProgram(object):
     def io_flags(self):
         self.send_flags()
         self.flags = self.read_flags()
+        print("[{}] SubPrgm Flags Read: {}".format(datetime.now(), self.flags))
 
     def send_flags(self):
         print("[{}] SubPrgm Flags Send: {}".format(datetime.now(), self.flags))
@@ -27,10 +29,13 @@ class SubProgram(object):
 
     def read_flags(self):
         with open(r".flags.pkl", "rb") as inpfile:
-            flags = pickle.load(inpfile)
-        if flags:
+            try:
+                flags = pickle.load(inpfile)
+            except:
+                print("[{}] SubPrgm Flags Busy: Reusing old".format(datetime.now()))
+                flags = self.flags
             self.flags = flags
-            return (self.flags)
+            return self.flags
 
 
 if __name__ == "__main__":
