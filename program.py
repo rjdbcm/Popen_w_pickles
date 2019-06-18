@@ -31,7 +31,7 @@ class SubProgramWatcher(QThread):
         count = 0
         while self.proc.poll() is None:  # While the process is running read flags
             if self.read_flags()['progress'] < 1.0:
-                if not self.read_flags()['done'] or self.read_flags()['killed']:
+                if not self.read_flags()['done']:
                     time.sleep(.5)
                     print("[{}] Program Flags Read: {}".format(datetime.now(), self.read_flags()))
                     count += 1

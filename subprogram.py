@@ -9,8 +9,8 @@ class SubProgram(object):
     def __init__(self):
 
         while self.read_flags()['progress'] < 1.0:
-            time.sleep(1)
-            self.flags['progress'] += .1
+            time.sleep(.1)
+            self.flags['progress'] += .01
             self.io_flags()
         else:
             self.flags['done'] = True
