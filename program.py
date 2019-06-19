@@ -1,9 +1,6 @@
-from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
 import subprocess
 from datetime import datetime
-import pickle
 import time
 import sys
 from flags import FlagIO
@@ -18,12 +15,13 @@ class SubProgramWatcher(QThread, FlagIO):
 
     def run(self):
         count = 0
-        while self.proc.poll() is None and not self.read_flags()['kill'] or self.read_flags()['done']:  # While the process is running read flags
-            if self.read_flags()['progress'] < 1.0:  # Check that we a
+        limit = 500
+        while self.proc.poll() is None and not self.read_flags()['kill'] or not self.read_flags()['done']:  # While the process is running read flags
+            if self.read_flags()['progress'] < 1.0:
                 time.sleep(.1)
                 print(self.READ_MSG.format(datetime.now(), type(self).__name__, self.read_flags()))
                 count += 1
-                if count > 20:
+                if count > limit:
                     self.flags['kill'] = True
                     self.send_flags()
         print("[{}] Finished!".format(datetime.now()))

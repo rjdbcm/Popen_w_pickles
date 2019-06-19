@@ -1,9 +1,6 @@
-import pickle
 from datetime import datetime
 import time
 from flags import FlagIO
-import sys
-import io
 
 
 class SubProgram(FlagIO):
@@ -11,7 +8,7 @@ class SubProgram(FlagIO):
         FlagIO.__init__(self)  # Old-school inheritance
 
         self.flags = self.read_flags()
-        while self.flags['progress'] < 1.0 and self.flags['kill'] == False:
+        while self.flags['progress'] < 1.0 and not self.flags['kill']:
             time.sleep(.1)
             self.io_flags()
             self.flags['progress'] += .01
