@@ -27,7 +27,7 @@ class SubProgramWatcher(QThread, FlagIO):
         print("[{}] Finished!".format(datetime.now()))
 
 
-def clean():
+def cleanup():
     FlagIO.cleanup_ramdisk(SubProgramWatcher)
 
 
@@ -37,7 +37,7 @@ def main():
     proc = subprocess.Popen([sys.executable, "subprogram.py"], stdout=subprocess.PIPE, shell=False)
     thread = SubProgramWatcher(proc, flags)
     thread.finished.connect(app.exit)
-    thread.finished.connect(clean)
+    thread.finished.connect(cleanup)
     thread.start()
     sys.exit(app.exec_())
 

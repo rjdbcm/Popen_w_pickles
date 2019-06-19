@@ -1,6 +1,7 @@
 from datetime import datetime
 import pickle
 import sys
+import time
 import os
 
 
@@ -11,6 +12,7 @@ class FlagIO(object):
         if sys.platform == "darwin":
             ramdisk = "/Volumes/RAMDisk"
             os.system(". mac_shm_setup.sh; RAMDisk_mount")
+            time.sleep(.5)  # Give the OS time to finish
         else:
             ramdisk = "/dev/shm"
         self.flagpath = os.path.join(ramdisk, flagfile)
