@@ -1,18 +1,20 @@
 import pickle
 from datetime import datetime
 import time
+from flags import FlagIO
 import sys
 import io
 
 
-class SubProgram(object):
+class SubProgram(FlagIO):
     def __init__(self):
+        FlagIO.__init__(self)  # Old-school inheritance
+
         self.flags = self.read_flags()
-        self.io_flags()
-        while self.flags['progress'] < 1.0:
+        while self.flags['progress'] < 1.0 and self.flags['kill'] == False:
             time.sleep(.1)
-            self.flags['progress'] += .01
             self.io_flags()
+            self.flags['progress'] += .01
         else:
             self.flags['done'] = True
             self.io_flags()
@@ -20,23 +22,7 @@ class SubProgram(object):
     def io_flags(self):
         self.send_flags()
         self.flags = self.read_flags()
-        print("[{}] SubPrgm Flags Read: {}".format(datetime.now(), self.flags))
-
-    def send_flags(self):
-        print("[{}] SubPrgm Flags Send: {}".format(datetime.now(), self.flags))
-        with open(r".flags.pkl", "wb") as outfile:
-            pickle.dump(self.flags, outfile)
-
-    def read_flags(self):
-        with open(r".flags.pkl", "rb") as inpfile:
-            try:
-                flags = pickle.load(inpfile)
-            except:
-                print("[{}] SubPrgm Flags Busy: Reusing old".format(datetime.now()))
-                flags = self.flags
-            self.flags = flags
-            return self.flags
-
+        print(self.READ_MSG.format(datetime.now(), type(self).__name__, self.read_flags()))
 
 if __name__ == "__main__":
     SubProgram()
