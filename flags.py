@@ -1,8 +1,19 @@
 from datetime import datetime
 import pickle
+import sys
+import os
+
+
 class FlagIO(object):
     def __init__(self):
         self.READ_MSG = "[{}] {} Flags Read: {}"
+        flagfile = ".flags.pkl"
+        if sys.platform == "darwin":
+            ramdisk = "/Volumes/RAMDisk"
+            os.system("./mac_shm_setup.sh mount")
+        else:
+            ramdisk = "/dev/shm"
+        self.flagpath = os.path.join(ramdisk, flagfile)
 
     def send_flags(self):
         print("[{}] {} Flags Send: {}".format(datetime.now(), type(self).__name__, self.flags))
