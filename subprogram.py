@@ -5,13 +5,14 @@ from flags import FlagIO
 
 class SubProgram(FlagIO):
     def __init__(self):
-        FlagIO.__init__(self)  # Old-school inheritance
-
+        FlagIO.__init__(self, subprogram=True)  # Old-school inheritance
         self.flags = self.read_flags()
+        self.flags['started'] = True
+        self.io_flags()
         while self.flags['progress'] < 1.0 and not self.flags['kill']:
             time.sleep(.1)
             self.io_flags()
-            self.flags['progress'] += .01
+            self.flags['progress'] += .05
         else:
             self.flags['done'] = True
             self.io_flags()

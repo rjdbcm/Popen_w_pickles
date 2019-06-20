@@ -9,17 +9,18 @@ from flags import FlagIO
 class SubProgramWatcher(QThread, FlagIO):
     def __init__(self, proc, flags):
         super(SubProgramWatcher, self).__init__()
+        self.proc = proc
         self.flags = flags
         self.send_flags()
-        self.proc = proc
+        time.sleep(1)
 
     def run(self):
         count = 0
         limit = 500
         while self.proc.poll() is None and not self.read_flags()['kill'] or not self.read_flags()['done']:  # While the process is running read flags
-            if self.read_flags()['progress'] < 1.0:
-                time.sleep(.1)
+            if self.read_flags()['progress'] < 1.0 and self.read_flags()['started']:
                 print(self.READ_MSG.format(datetime.now(), type(self).__name__, self.read_flags()))
+                time.sleep(.1)
                 count += 1
                 if count > limit:
                     self.flags['kill'] = True
@@ -33,7 +34,7 @@ def cleanup():
 
 def main():
     app = QCoreApplication([])
-    flags = {'done': False, "progress": 0.0, 'kill': False}
+    flags = {'done': False, "progress": 0.0, 'kill': False, 'started': False}
     proc = subprocess.Popen([sys.executable, "subprogram.py"], stdout=subprocess.PIPE, shell=False)
     thread = SubProgramWatcher(proc, flags)
     thread.finished.connect(app.exit)
