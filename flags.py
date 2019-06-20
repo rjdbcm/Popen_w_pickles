@@ -19,7 +19,7 @@ class FlagIO(object):
                 time.sleep(5)
 
     def send_flags(self):
-        print("[{}] {} Flags Send: {}".format(datetime.now(), type(self).__name__, self.flags))
+        # print("[{}] {} Flags Send: {}".format(datetime.now(), type(self).__name__, self.flags))
         with open(r"{}".format(self.flagpath), "wb") as outfile:
             pickle.dump(self.flags, outfile)
 
@@ -33,7 +33,7 @@ class FlagIO(object):
                     try:
                         flags = pickle.load(inpfile)
                     except EOFError:
-                        print("[{}] {} Flags Busy: Reusing old".format(datetime.now(), type(self).__name__))
+                        # print("[{}] {} Flags Busy: Reusing old".format(datetime.now(), type(self).__name__))
                         flags = self.flags
                     self.flags = flags
                     return self.flags

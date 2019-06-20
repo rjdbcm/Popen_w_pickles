@@ -1,6 +1,7 @@
 from PyQt5.QtCore import *
 import subprocess
 from datetime import datetime
+from tqdm import tqdm
 import time
 import sys
 from flags import FlagIO
@@ -16,17 +17,25 @@ class SubProgramWatcher(QThread, FlagIO):
 
     def run(self):
         count = 0
-        limit = 500
-        while self.proc.poll() is None and not self.read_flags()['kill'] or not self.read_flags()['done']:  # While the process is running read flags
-            if self.read_flags()['progress'] < 1.0 and self.read_flags()['started']:
-                print(self.READ_MSG.format(datetime.now(), type(self).__name__, self.read_flags()))
-                time.sleep(.1)
-                count += 1
-                if count > limit:
-                    self.flags['kill'] = True
-                    self.send_flags()
-                    break
-        print("[{}] Finished!".format(datetime.now()))
+        limit = 100
+        with tqdm(total=1.0, desc="SubProgram Progress") as pbar:
+            while self.proc.poll() is None and not self.read_flags()['kill'] or not self.read_flags()['done']:  # While the process is running read flags
+                if self.read_flags()['progress'] < 1.0 and self.read_flags()['started']:
+                    # print(self.READ_MSG.format(datetime.now(), type(self).__name__, self.read_flags()))
+                    f1 = self.read_flags()['progress']
+                    time.sleep(.1)
+                    f2 = self.read_flags()['progress']
+                    pbar.update(f2-f1)
+                    count += 1
+                    if count > limit:
+                        self.flags['kill'] = True
+                        self.send_flags()
+                        time.sleep(5)
+                        self.proc.kill()
+                        pbar.close()
+                        break
+            pbar.close()
+            print("[{}] Finished!".format(datetime.now()))
 
 
 def cleanup():
