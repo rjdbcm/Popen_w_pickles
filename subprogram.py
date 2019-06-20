@@ -10,7 +10,7 @@ class SubProgram(FlagIO):
         self.flags['started'] = True
         self.io_flags()
         while self.flags['progress'] < 1.0 and not self.flags['kill']:
-            time.sleep(.1)
+            time.sleep(.5)
             self.io_flags()
             self.flags['progress'] += .05
         else:

@@ -25,6 +25,7 @@ class SubProgramWatcher(QThread, FlagIO):
                 if count > limit:
                     self.flags['kill'] = True
                     self.send_flags()
+                    break
         print("[{}] Finished!".format(datetime.now()))
 
 

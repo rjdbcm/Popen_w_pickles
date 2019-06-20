@@ -4,6 +4,7 @@ import sys
 import time
 import os
 
+
 class FlagIO(object):
     def __init__(self, subprogram=False, delay=0.2):
         self.READ_MSG = "[{}] {} Flags Read: {}"
@@ -23,14 +24,24 @@ class FlagIO(object):
             pickle.dump(self.flags, outfile)
 
     def read_flags(self):
-        with open(r"{}".format(self.flagpath), "rb") as inpfile:
+        inpfile = None
+        count = 0
+        while inpfile is None:  # retry-while loop
+            count += 1
             try:
-                flags = pickle.load(inpfile)
-            except EOFError:
-                print("[{}] {} Flags Busy: Reusing old".format(datetime.now(), type(self).__name__))
-                flags = self.flags
-            self.flags = flags
-            return self.flags
+                with open(r"{}".format(self.flagpath), "rb") as inpfile:
+                    try:
+                        flags = pickle.load(inpfile)
+                    except EOFError:
+                        print("[{}] {} Flags Busy: Reusing old".format(datetime.now(), type(self).__name__))
+                        flags = self.flags
+                    self.flags = flags
+                    return self.flags
+            except FileNotFoundError:
+                if count > 10:
+                    break
+                else:
+                    time.sleep(self.delay)
 
     def init_ramdisk(self):
         flagfile = ".flags.pkl"
@@ -49,3 +60,4 @@ class FlagIO(object):
             os.system("./mac_shm_setup.sh unmount")
         else:
             pass
+
