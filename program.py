@@ -18,7 +18,7 @@ class SubProgramWatcher(QThread, FlagIO):
     def run(self):
         count = 0
         limit = 100
-        with tqdm(total=1.0, desc="SubProgram Progress") as pbar:
+        with tqdm(total=1.0, desc="SubProgram Progress", file=sys.stdout) as pbar:
             while self.proc.poll() is None and not self.read_flags()['kill'] or not self.read_flags()['done']:  # While the process is running read flags
                 if self.read_flags()['progress'] < 1.0 and self.read_flags()['started']:
                     # print(self.READ_MSG.format(datetime.now(), type(self).__name__, self.read_flags()))
@@ -34,8 +34,8 @@ class SubProgramWatcher(QThread, FlagIO):
                         self.proc.kill()
                         pbar.close()
                         break
-            pbar.close()
-            print("[{}] Finished!".format(datetime.now()))
+        pbar.update(1)
+        # print("[{}] Finished!".format(datetime.now()))
 
 
 def cleanup():
