@@ -35,6 +35,7 @@ def cleanup():
 def main():
     app = QCoreApplication([])
     flags = {'done': False, "progress": 0.0, 'kill': False, 'started': False}
+    cleanup()
     proc = subprocess.Popen([sys.executable, "subprogram.py"], stdout=subprocess.PIPE, shell=False)
     thread = SubProgramWatcher(proc, flags)
     thread.finished.connect(app.exit)
