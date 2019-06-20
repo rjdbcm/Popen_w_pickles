@@ -8,8 +8,10 @@ from flags import FlagIO
 
 
 class SubProgramWatcher(QThread, FlagIO):
-    def __init__(self, proc, flags):
+    def __init__(self, proc, flags, timeout, rate=0.1):
         super(SubProgramWatcher, self).__init__()
+        self.limit = timeout // rate
+        self.rate = rate
         self.proc = proc
         self.flags = flags
         self.send_flags()
@@ -17,25 +19,30 @@ class SubProgramWatcher(QThread, FlagIO):
 
     def run(self):
         count = 0
-        limit = 100
-        with tqdm(total=1.0, desc="SubProgram Progress", file=sys.stdout) as pbar:
+        with tqdm(total=1.0, desc="SubProgram Progress", file=sys.stdout, smoothing=0.2,
+                  bar_format='{l_bar}{bar}|{elapsed}/{remaining}') as pbar:
             while self.proc.poll() is None and not self.read_flags()['kill'] or not self.read_flags()['done']:  # While the process is running read flags
                 if self.read_flags()['progress'] < 1.0 and self.read_flags()['started']:
                     # print(self.READ_MSG.format(datetime.now(), type(self).__name__, self.read_flags()))
                     f1 = self.read_flags()['progress']
-                    time.sleep(.1)
+                    time.sleep(self.rate)
                     f2 = self.read_flags()['progress']
-                    pbar.update(f2-f1)
+                    pbar.update(round(f2-f1, 3))
                     count += 1
-                    if count > limit:
+                    if count > self.limit:
                         self.flags['kill'] = True
                         self.send_flags()
-                        time.sleep(5)
                         self.proc.kill()
-                        pbar.close()
                         break
-        pbar.update(1)
-        # print("[{}] Finished!".format(datetime.now()))
+            if not self.flags['kill']:
+                while pbar.n < 1.0:
+                    pbar.update(round(1.0-pbar.n, 3))
+                    time.sleep(self.rate)
+            pbar.clear()
+        if self.flags['kill']:
+            print("CPU Timeout Exceeded: SubProgram Killed!")
+        elif self.flags['done']:
+            print("Finished!")
 
 
 def cleanup():
@@ -47,7 +54,7 @@ def main():
     flags = {'done': False, "progress": 0.0, 'kill': False, 'started': False}
     cleanup()
     proc = subprocess.Popen([sys.executable, "subprogram.py"], stdout=subprocess.PIPE, shell=False)
-    thread = SubProgramWatcher(proc, flags)
+    thread = SubProgramWatcher(proc, flags, 150)
     thread.finished.connect(app.exit)
     thread.finished.connect(cleanup)
     thread.start()

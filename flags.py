@@ -6,7 +6,7 @@ import os
 
 
 class FlagIO(object):
-    def __init__(self, subprogram=False, delay=0.2):
+    def __init__(self, subprogram=False, delay=0.1):
         self.READ_MSG = "[{}] {} Flags Read: {}"
         self.subprogram = subprogram
         self.delay = delay
@@ -16,7 +16,7 @@ class FlagIO(object):
                 f = open(self.flagpath)
                 f.close()
             except FileNotFoundError:
-                time.sleep(5)
+                time.sleep(1)
 
     def send_flags(self):
         # print("[{}] {} Flags Send: {}".format(datetime.now(), type(self).__name__, self.flags))
@@ -33,6 +33,7 @@ class FlagIO(object):
                     try:
                         flags = pickle.load(inpfile)
                     except EOFError:
+                        time.sleep(self.delay)
                         # print("[{}] {} Flags Busy: Reusing old".format(datetime.now(), type(self).__name__))
                         flags = self.flags
                     self.flags = flags
