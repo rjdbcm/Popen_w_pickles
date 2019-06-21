@@ -5,6 +5,28 @@ import time
 import os
 
 
+class Flags(dict):
+    """Allows you to set and get {key, value} pairs like attributes"""
+    def __init__(self, defaults=True):
+        if defaults:
+            self.get_defaults()
+
+    def __getattr__(self, attr):
+        return self[attr]
+
+    def __setattr__(self, attr, value):
+        self[attr] = value
+
+    def __getstate__(self):
+        pass
+
+    def get_defaults(self):
+        self.kill = False
+        self.done = False
+        self.started = False
+        self.progress = 0.0
+
+
 class FlagIO(object):
     def __init__(self, subprogram=False, delay=0.1):
         self.READ_MSG = "[{}] {} Flags Read: {}"

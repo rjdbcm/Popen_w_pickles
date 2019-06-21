@@ -10,10 +10,12 @@ function RAMDisk_unmount() {
     CURDISK="$(diskutil info RAMDisk | grep -o '/dev/disk[1-99]')"
     hdiutil detach -quiet $CURDISK
 }
-if [[ "$1" = "mount" ]]; then
-    RAMDisk_mount
-fi
 
-if [[ "$1" = "unmount" ]]; then
-    RAMDisk_unmount
-fi
+eval ${NAME}_${1}
+#if [[ "$1" = "mount" ]]; then
+#    RAMDisk_mount
+#fi
+#
+#if [[ "$1" = "unmount" ]]; then
+#    RAMDisk_unmount
+#fi
