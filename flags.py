@@ -66,6 +66,10 @@ class FlagIO(object):
                 else:
                     time.sleep(self.delay)
 
+    def io_flags(self):
+        self.send_flags()
+        self.flags = self.read_flags()
+
     def init_ramdisk(self):
         flagfile = ".flags.pkl"
         if sys.platform == "darwin":

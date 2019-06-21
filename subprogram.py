@@ -15,16 +15,11 @@ class SubProgram(FlagIO):
             except KeyboardInterrupt:  # Catch a keyboard interrupt and unmount the ramdisk
                 self.cleanup_ramdisk()
                 raise KeyboardInterrupt
-            self.io_flags()
             self.flags.progress += .01
+            self.io_flags()
         else:
             self.flags.done = True
             self.io_flags()
-
-    def io_flags(self):
-        self.send_flags()
-        self.flags = self.read_flags()
-        print(self.READ_MSG.format(datetime.now(), type(self).__name__, self.read_flags()))
 
 
 if __name__ == "__main__":
