@@ -52,9 +52,8 @@ def cleanup():
 def main():
     app = QCoreApplication([])
     flags = Flags()
-    cleanup()
     proc = subprocess.Popen([sys.executable, "subprogram.py"], stdout=subprocess.PIPE, shell=False)
-    thread = SubProgramWatcher(proc, flags, 150)
+    thread = SubProgramWatcher(proc, flags, 55)
     thread.finished.connect(app.exit)
     thread.finished.connect(cleanup)
     thread.start()

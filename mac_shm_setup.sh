@@ -7,8 +7,17 @@ function RAMDisk_mount() {
 }
 
 function RAMDisk_unmount() {
-    CURDISK="$(diskutil info RAMDisk | grep -o '/dev/disk[1-99]')"
-    hdiutil detach -quiet $CURDISK
+    while true
+    do
+        CURDISK=$(diskutil info RAMDisk | grep -o '/dev/disk[1-99]')
+        echo ${1} $CURDISK
+        if [[ "$CURDISK" = "" ]]
+        then
+            exit
+        else
+            hdiutil detach -quiet $CURDISK
+        fi
+    done
 }
 
 eval ${NAME}_${1}
